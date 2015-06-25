@@ -27,7 +27,7 @@ public class WidgetProvider extends AppWidgetProvider {
     private static final String CLICK_RESET_BUTTON      = "resetButtonOnClick";
     private static final String CLICK_LOG_TIME_BUTTON   = "logTimeButtonOnClick";
 
-    private static int[] sWidgetIds;
+    private static int[] sWidgetIds = new int[0];
     private static Date sStartTime;
     private static Handler sHandler;
     private static long sTimerMillis = 0;
