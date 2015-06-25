@@ -25,7 +25,6 @@ public class TimerNotification {
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
                 .setContentTitle("Teamwork timer")
                 .setContentText(time)
-
                 .setSmallIcon(R.drawable.ic_pause_circle_filled_white_24dp)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_pause_circle_filled_white_24dp));
 //                .setOngoing(true);
@@ -44,6 +43,11 @@ public class TimerNotification {
         }
 
         NotificationManagerCompat notifManager = NotificationManagerCompat.from(context);
+        NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender();
+
+        wearableExtender.setBackground(BitmapFactory.decodeResource(context.getResources(), R.drawable.wear_background));
+        notifBuilder.extend(wearableExtender);
+
         notifManager.notify(NOTIFICATION_ID, notifBuilder.build());
 
     }
