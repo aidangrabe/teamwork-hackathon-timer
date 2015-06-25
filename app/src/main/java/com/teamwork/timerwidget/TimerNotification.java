@@ -31,15 +31,15 @@ public class TimerNotification {
 //                .setOngoing(true);
 
         if (isStarted(state)) {
-            notifBuilder.addAction(R.drawable.pause_white_24dp, "Pause",
+            notifBuilder.addAction(R.drawable.ic_pause_white_24dp, "Pause",
                     getWidgetPendingIntent(context, WidgetProvider.CLICK_PLAY_BUTTON));
         } else if (isPaused(state)) {
-            notifBuilder.addAction(R.drawable.play_white_24dp, "Play",
+            notifBuilder.addAction(R.drawable.ic_play_arrow_white_24dp, "Play",
                     getWidgetPendingIntent(context, WidgetProvider.CLICK_PLAY_BUTTON));
         }
 
         if (!isStopped(state)) {
-            notifBuilder.addAction(R.drawable.refresh_white_24dp, "Reset",
+            notifBuilder.addAction(R.drawable.ic_replay_white_24dp, "Reset",
                     getWidgetPendingIntent(context, WidgetProvider.CLICK_RESET_BUTTON));
         }
 
