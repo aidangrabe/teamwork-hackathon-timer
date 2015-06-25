@@ -14,6 +14,8 @@ import android.widget.RemoteViews;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,7 +30,7 @@ public class WidgetProvider extends AppWidgetProvider {
     public static final String CLICK_RESET_BUTTON      = "resetButtonOnClick";
     public static final String CLICK_LOG_TIME_BUTTON   = "logTimeButtonOnClick";
 
-    private static int[] sWidgetIds = new int[0];
+    private static Set<Integer> sWidgetIds = new HashSet<>();
     private static Date sStartTime;
     private static Handler sHandler;
     private static long sTimerMillis = 0;
@@ -55,7 +57,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
     // shorter convenience method of onUpdate()
     public void onUpdate(Context context) {
-        onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
+        onUpdate(context, AppWidgetManager.getInstance(context), idsAsArray());
     }
 
     @Override
@@ -64,12 +66,16 @@ public class WidgetProvider extends AppWidgetProvider {
 
         Log.d("tw", "onUpdate");
 
-        int[] newWidgetIds = new int[appWidgetIds.length + sWidgetIds.length];
-        System.arraycopy(sWidgetIds, 0, newWidgetIds, 0, sWidgetIds.length);
-        System.arraycopy(appWidgetIds, 0, newWidgetIds, sWidgetIds.length, appWidgetIds.length);
-        sWidgetIds = newWidgetIds;
+//        int[] newWidgetIds = new int[appWidgetIds.length + sWidgetIds.size()];
+//        System.arraycopy(sWidgetIds, 0, newWidgetIds, 0, sWidgetIds.size());
+//        System.arraycopy(appWidgetIds, 0, newWidgetIds, sWidgetIds.size(), appWidgetIds.length);
+//        sWidgetIds = newWidgetIds;
 
-        Log.d("tw", "widget ids: " + Arrays.toString(sWidgetIds));
+        for (int id : appWidgetIds) {
+            sWidgetIds.add(id);
+        }
+
+//        Log.d("tw", "widget ids: " + Arrays.toString(sWidgetIds));
 
         Date now = Calendar.getInstance().getTime();
 
@@ -233,6 +239,14 @@ public class WidgetProvider extends AppWidgetProvider {
 
     }
 
+    @Override
+    public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) {
+        super.onRestored(context, oldWidgetIds, newWidgetIds);
+
+        Log.d("tw", "onRestored: \n\told: " + Arrays.toString(oldWidgetIds) + "\n\tnew: " + Arrays.toString(newWidgetIds));
+
+    }
+
     private boolean isStarted() {
         return sTimerState == TimerState.STARTED;
     }
@@ -243,6 +257,16 @@ public class WidgetProvider extends AppWidgetProvider {
 
     private boolean isStopped() {
         return sTimerState == TimerState.STOPPED;
+    }
+
+    private int[] idsAsArray() {
+        int[] array = new int[sWidgetIds.size()];
+        int i = 0;
+        for (int n : sWidgetIds) {
+            array[i] = n;
+            i++;
+        }
+        return array;
     }
 
 }
