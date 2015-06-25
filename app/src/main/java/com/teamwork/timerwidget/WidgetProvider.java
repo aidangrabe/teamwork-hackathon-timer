@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import java.util.Calendar;
@@ -23,6 +24,7 @@ public class WidgetProvider extends AppWidgetProvider {
     private static final long UPDATE_INTERVAL = TimeUnit.SECONDS.toMillis(5);
 
     private static final String CLICK_PLAY_BUTTON = "playButtonOnClick";
+    private static final String CLICK_RESET_BUTTON = "resetButtonOnClick";
 
     private static boolean sTimerStarted = false;
     private static int[] sWidgetIds;
@@ -63,7 +65,6 @@ public class WidgetProvider extends AppWidgetProvider {
 
             if (sTimerStarted) {
 
-
                 long deltaMillis = now.getTime() - sStartTime.getTime();
                 int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(deltaMillis) % 60);
                 int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(deltaMillis) % 60);
@@ -71,17 +72,31 @@ public class WidgetProvider extends AppWidgetProvider {
 
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
                 remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
+                showExtraButtons(remoteViews, false);
             } else {
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_play_circle_filled_white_48dp);
             }
 
+            if (!sTimerStarted && sStartTime != null) {
+                showExtraButtons(remoteViews, true);
+            }
+
+            // onclick listeners
             remoteViews.setOnClickPendingIntent(R.id.play_button,
                     getPendingSelfIntent(context, CLICK_PLAY_BUTTON));
+            remoteViews.setOnClickPendingIntent(R.id.reset_button,
+                    getPendingSelfIntent(context, CLICK_RESET_BUTTON));
 
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
 
         }
 
+    }
+
+    private void showExtraButtons(RemoteViews remoteViews, boolean show) {
+        int visible = show ? View.VISIBLE : View.GONE;
+        remoteViews.setViewVisibility(R.id.reset_button, visible);
+        remoteViews.setViewVisibility(R.id.log_time_button, visible);
     }
 
     private void startUpdateTimer(final Context context, final int[] appWidgetIds) {
@@ -112,12 +127,26 @@ public class WidgetProvider extends AppWidgetProvider {
         onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
     }
 
+    public void resetTimer() {
+        sTimerStarted   = false;
+        sStartTime      = null;
+    }
+
+    public void onResetButtonClicked(Context context) {
+
+        resetTimer();
+        onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
+
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
         if (intent.getAction().equals(CLICK_PLAY_BUTTON)) {
             onPlayButtonClicked(context);
+        } else if (intent.getAction().equals(CLICK_PLAY_BUTTON)) {
+            onResetButtonClicked(context);
         }
 
     }
