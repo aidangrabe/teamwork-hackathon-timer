@@ -120,9 +120,14 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     private void showExtraButtons(RemoteViews remoteViews, boolean show) {
-        int visible = show ? View.VISIBLE : View.GONE;
-        remoteViews.setViewVisibility(R.id.reset_button, visible);
-        remoteViews.setViewVisibility(R.id.log_time_button, visible);
+        int buttonsVisible  = show ? View.VISIBLE : View.GONE;
+        int textVisible     = show ? View.GONE : View.VISIBLE;
+        remoteViews.setViewVisibility(R.id.reset_button, buttonsVisible);
+        remoteViews.setViewVisibility(R.id.log_time_button, buttonsVisible);
+
+        // time labels
+        remoteViews.setViewVisibility(R.id.time_label, textVisible);
+        remoteViews.setViewVisibility(R.id.detail_label, textVisible);
     }
 
     private void startUpdateTimer(final Context context, final int[] appWidgetIds) {
