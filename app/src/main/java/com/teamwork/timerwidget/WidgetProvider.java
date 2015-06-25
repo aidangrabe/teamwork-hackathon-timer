@@ -67,6 +67,7 @@ public class WidgetProvider extends AppWidgetProvider {
                 long deltaMillis = now.getTime() - sStartTime.getTime();
                 int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(deltaMillis) % 60);
                 int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(deltaMillis) % 60);
+                int hours   = (int) (TimeUnit.MILLISECONDS.toHours(deltaMillis));
 
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
                 remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
