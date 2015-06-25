@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +64,13 @@ public class WidgetProvider extends AppWidgetProvider {
 
         Log.d("tw", "onUpdate");
 
-        sWidgetIds = appWidgetIds;
+        int[] newWidgetIds = new int[appWidgetIds.length + sWidgetIds.length];
+        System.arraycopy(sWidgetIds, 0, newWidgetIds, 0, sWidgetIds.length);
+        System.arraycopy(appWidgetIds, 0, newWidgetIds, sWidgetIds.length, appWidgetIds.length);
+        sWidgetIds = newWidgetIds;
+
+        Log.d("tw", "widget ids: " + Arrays.toString(sWidgetIds));
+
         Date now = Calendar.getInstance().getTime();
 
         // call onUpdate again in UPDATE_INTERVAL milliseconds
@@ -71,7 +78,7 @@ public class WidgetProvider extends AppWidgetProvider {
             startUpdateTimer(context, appWidgetIds);
         }
 
-        for (int widgetId : appWidgetIds) {
+        for (int widgetId : sWidgetIds) {
 
             RemoteViews remoteViews = new RemoteViews(
                     context.getPackageName(),R.layout.widget_layout);
