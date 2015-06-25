@@ -27,11 +27,10 @@ public class WidgetProvider extends AppWidgetProvider {
     private static final String CLICK_RESET_BUTTON      = "resetButtonOnClick";
     private static final String CLICK_LOG_TIME_BUTTON   = "logTimeButtonOnClick";
 
-    private static boolean sTimerStarted = false;
     private static int[] sWidgetIds;
     private static Date sStartTime;
     private static Handler sHandler;
-    private static long sTimerMillis;
+    private static long sTimerMillis = 0;
     private static TimerState sTimerState = TimerState.STOPPED;
 
     enum TimerState {
@@ -40,8 +39,9 @@ public class WidgetProvider extends AppWidgetProvider {
 
     public WidgetProvider() {
 
-        sHandler        = new Handler(Looper.getMainLooper());
-        sTimerMillis    = 0;
+        if (sHandler == null) {
+            sHandler = new Handler(Looper.getMainLooper());
+        }
 
     }
 
@@ -73,6 +73,8 @@ public class WidgetProvider extends AppWidgetProvider {
             if (isStarted()) {
 
                 long deltaMillis = now.getTime() - sStartTime.getTime();
+                deltaMillis += sTimerMillis;
+                Log.d("tw", "counting -> adding " + sTimerMillis + " to timer");
                 int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(deltaMillis) % 60);
                 int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(deltaMillis) % 60);
                 int hours   = (int) (TimeUnit.MILLISECONDS.toHours(deltaMillis));
@@ -121,21 +123,29 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     public void startTimer() {
-        sTimerState = TimerState.STARTED;
+        sTimerState     = TimerState.STARTED;
 
-        sStartTime = Calendar.getInstance().getTime();
+        sStartTime      = Calendar.getInstance().getTime();
+        sTimerMillis    = 0;
     }
 
     public void resumeTimer() {
         sTimerState = TimerState.STARTED;
+        sStartTime  = Calendar.getInstance().getTime();
+        Log.d("tw", "Resuming timer");
     }
 
     public void pauseTimer() {
         sTimerState = TimerState.PAUSED;
+
+        sTimerMillis += Calendar.getInstance().getTimeInMillis() - sStartTime.getTime();
+        Log.d("tw", "Paused at: " + TimeUnit.MILLISECONDS.toSeconds(sTimerMillis) + " seconds");
     }
 
     public void resetTimer() {
-        sTimerState = TimerState.STOPPED;
+        sTimerState     = TimerState.STOPPED;
+        sTimerMillis    = 0;
+        sStartTime      = null;
     }
 
     public void onPlayButtonClicked(Context context) {
@@ -151,7 +161,6 @@ public class WidgetProvider extends AppWidgetProvider {
             Log.d("tw", "isStopped, starting");
             startTimer();
         }
-        Log.d("tw", "State: " + sTimerState.name());
 
         onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
 
