@@ -23,9 +23,9 @@ public class WidgetProvider extends AppWidgetProvider {
 
     private static final long UPDATE_INTERVAL = TimeUnit.SECONDS.toMillis(2);
 
-    private static final String CLICK_PLAY_BUTTON       = "playButtonOnClick";
-    private static final String CLICK_RESET_BUTTON      = "resetButtonOnClick";
-    private static final String CLICK_LOG_TIME_BUTTON   = "logTimeButtonOnClick";
+    public static final String CLICK_PLAY_BUTTON       = "playButtonOnClick";
+    public static final String CLICK_RESET_BUTTON      = "resetButtonOnClick";
+    public static final String CLICK_LOG_TIME_BUTTON   = "logTimeButtonOnClick";
 
     private static int[] sWidgetIds = new int[0];
     private static Date sStartTime;
@@ -86,7 +86,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
                 remoteViews.setTextViewText(R.id.time_label, timeLabel);
 
-                TimerNotification.showNotification(context, timeLabel);
+                TimerNotification.showNotification(context, timeLabel, sTimerState);
             }
 
             if (isStopped()) {
