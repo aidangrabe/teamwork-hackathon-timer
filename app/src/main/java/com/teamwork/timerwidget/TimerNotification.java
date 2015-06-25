@@ -3,6 +3,7 @@ package com.teamwork.timerwidget;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -14,6 +15,7 @@ import android.support.v4.app.NotificationManagerCompat;
 public class TimerNotification {
 
     private static final int NOTIFICATION_ID = 1;
+    private static Bitmap sWearableBitmap;
 
     // private constructor for singleton
     private TimerNotification() {
@@ -45,8 +47,13 @@ public class TimerNotification {
         NotificationManagerCompat notifManager = NotificationManagerCompat.from(context);
         NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender();
 
-        wearableExtender.setBackground(BitmapFactory.decodeResource(context.getResources(), R.drawable.wear_background));
+        if (sWearableBitmap == null) {
+            sWearableBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wear_background);
+        }
+
+        wearableExtender.setBackground(sWearableBitmap);
         notifBuilder.extend(wearableExtender);
+        sWearBackgroundReady = true;
 
         notifManager.notify(NOTIFICATION_ID, notifBuilder.build());
 
