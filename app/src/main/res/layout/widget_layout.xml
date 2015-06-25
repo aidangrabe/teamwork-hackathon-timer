@@ -23,8 +23,6 @@
             android:layout_marginStart="2dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="2dp"
-            android:layout_marginEnd="4dp"
-            android:layout_marginRight="4dp"
             />
 
         <ImageView
@@ -39,7 +37,7 @@
             android:id="@+id/log_time_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_play_circle_filled_white_48dp"
+            android:src="@drawable/log_white_24dp"
             android:visibility="gone"
             />
 
@@ -52,6 +50,7 @@
         android:background="#45A6FD"
         android:gravity="right"
         android:paddingRight="8dp"
+        android:layout_marginLeft="4dp"
         >
 
         <TextView
