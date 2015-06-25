@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/pill_edge"
-            android:src="@drawable/ic_play_arrow_white_24dp"
+            android:src="@drawable/ic_play_circle_filled_white_48dp"
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_marginLeft="2dp"
             android:layout_marginTop="2dp"

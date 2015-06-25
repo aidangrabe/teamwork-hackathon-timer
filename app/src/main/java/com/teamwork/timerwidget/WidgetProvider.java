@@ -72,7 +72,7 @@ public class WidgetProvider extends AppWidgetProvider {
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
                 remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
             } else {
-                remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_play_arrow_white_24dp);
+                remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_play_circle_filled_white_48dp);
             }
 
             remoteViews.setOnClickPendingIntent(R.id.play_button,
