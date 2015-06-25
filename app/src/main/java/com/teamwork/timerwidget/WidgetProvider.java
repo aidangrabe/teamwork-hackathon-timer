@@ -89,7 +89,7 @@ public class WidgetProvider extends AppWidgetProvider {
             }
 
             if (isStopped() || isPaused()) {
-                remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_play_circle_filled_white_48dp);
+                remoteViews.setImageViewResource(R.id.play_button, R.drawable.play_white_24dp);
             }
 
             if (isStopped() || isStarted()) {
