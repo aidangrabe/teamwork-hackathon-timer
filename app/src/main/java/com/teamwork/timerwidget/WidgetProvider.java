@@ -66,16 +66,9 @@ public class WidgetProvider extends AppWidgetProvider {
 
         Log.d("tw", "onUpdate");
 
-//        int[] newWidgetIds = new int[appWidgetIds.length + sWidgetIds.size()];
-//        System.arraycopy(sWidgetIds, 0, newWidgetIds, 0, sWidgetIds.size());
-//        System.arraycopy(appWidgetIds, 0, newWidgetIds, sWidgetIds.size(), appWidgetIds.length);
-//        sWidgetIds = newWidgetIds;
-
         for (int id : appWidgetIds) {
             sWidgetIds.add(id);
         }
-
-//        Log.d("tw", "widget ids: " + Arrays.toString(sWidgetIds));
 
         Date now = Calendar.getInstance().getTime();
 
@@ -91,8 +84,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
             if (isStarted()) {
 
-                long deltaMillis = now.getTime() - sStartTime.getTime();
-                deltaMillis += sTimerMillis;
+                long deltaMillis = getTimerMillis(now);
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.pause_white_24dp);
 
                 String timeLabel = getTimeString(deltaMillis);
@@ -225,16 +217,29 @@ public class WidgetProvider extends AppWidgetProvider {
 
     }
 
+    public long getTimerMillis(Date now) {
+        if (now == null) {
+            now = new Date();
+        }
+        long deltaMillis = now.getTime() - sStartTime.getTime();
+        deltaMillis += sTimerMillis;
+        return deltaMillis;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
         if (intent.getAction().equals(CLICK_PLAY_BUTTON)) {
             onPlayButtonClicked(context);
+            TimerNotification.showNotification(context,
+                    getTimeString(sTimerMillis), sTimerState);
         } else if (intent.getAction().equals(CLICK_RESET_BUTTON)) {
             onResetButtonClicked(context);
+            TimerNotification.showNotification(context, getTimeString(sTimerMillis), sTimerState);
         } else if (intent.getAction().equals(CLICK_LOG_TIME_BUTTON)) {
             onLogTimeButtonClicked(context);
+            TimerNotification.showNotification(context, getTimeString(sTimerMillis), sTimerState);
         }
 
     }
