@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class WidgetProvider extends AppWidgetProvider {
 
+    private static final long UPDATE_INTERVAL = TimeUnit.SECONDS.toMillis(5);
+
     private static final String CLICK_PLAY_BUTTON = "playButtonOnClick";
 
     private static boolean sTimerStarted = false;
@@ -44,21 +46,15 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
-        final Context c = context;
-        final int[] ids = appWidgetIds;
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                Log.d("tw", "Handler calling!");
-                onUpdate(c, AppWidgetManager.getInstance(c), ids);
-            }
-        };
-        sHandler.removeCallbacks(r);
-        sHandler.postDelayed(r, 10000);
-
         Log.d("tw", "onUpdate");
 
         sWidgetIds = appWidgetIds;
+
+
+        Date now = Calendar.getInstance().getTime();
+        if (sTimerStarted) {
+            startUpdateTimer(context, appWidgetIds);
+        }
 
         for (int widgetId : appWidgetIds) {
 
@@ -67,14 +63,10 @@ public class WidgetProvider extends AppWidgetProvider {
 
             if (sTimerStarted) {
 
-                Date now = Calendar.getInstance().getTime();
+
                 long deltaMillis = now.getTime() - sStartTime.getTime();
                 int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(deltaMillis) % 60);
                 int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(deltaMillis) % 60);
-                int hours   = (int) (TimeUnit.MILLISECONDS.toHours(deltaMillis));
-                Log.d("tw", "deltaMillis: " + deltaMillis);
-                Log.d("tw", "minutes: " + (TimeUnit.MILLISECONDS.toMinutes(deltaMillis)));
-                Log.d("tw", "hours: " + hours);
 
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
                 remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
@@ -91,8 +83,24 @@ public class WidgetProvider extends AppWidgetProvider {
 
     }
 
+    private void startUpdateTimer(final Context context, final int[] appWidgetIds) {
+        final Context c = context;
+        final int[] ids = appWidgetIds;
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                Log.d("tw", "Handler calling!");
+                onUpdate(c, AppWidgetManager.getInstance(c), ids);
+            }
+        };
+        sHandler.removeCallbacks(r);
+        sHandler.postDelayed(r, UPDATE_INTERVAL);
+    }
+
     public void startTimer() {
-        sStartTime = Calendar.getInstance().getTime();
+        if (sStartTime == null) {
+            sStartTime = Calendar.getInstance().getTime();
+        }
     }
 
     public void onPlayButtonClicked(Context context) {
