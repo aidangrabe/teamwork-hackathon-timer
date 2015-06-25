@@ -81,11 +81,17 @@ public class WidgetProvider extends AppWidgetProvider {
                 long deltaMillis = now.getTime() - sStartTime.getTime();
                 deltaMillis += sTimerMillis;
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
-                setTimeLabel(remoteViews, deltaMillis);
+
+                String timeLabel = getTimeString(deltaMillis);
+
+                remoteViews.setTextViewText(R.id.time_label, timeLabel);
+
+                TimerNotification.showNotification(context, timeLabel);
             }
 
             if (isStopped()) {
-                setTimeLabel(remoteViews, 0);
+                String timeLabel = getTimeString(0);
+                remoteViews.setTextViewText(R.id.time_label, timeLabel);
             }
 
             if (isStopped() || isPaused()) {
@@ -112,11 +118,11 @@ public class WidgetProvider extends AppWidgetProvider {
 
     }
 
-    private void setTimeLabel(RemoteViews remoteViews, long millis) {
+    private String getTimeString(long millis) {
         int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(millis) % 60);
         int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(millis) % 60);
         int hours   = (int) (TimeUnit.MILLISECONDS.toHours(millis));
-        remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
+        return String.format("%d:%02d:%02d", hours, minutes, seconds);
     }
 
     private void showExtraButtons(RemoteViews remoteViews, boolean show) {
