@@ -1,10 +1,11 @@
 package com.teamwork.timerwidget;
 
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 
 /**
  * Created by aidangrabe on 25/06/15.
@@ -24,8 +25,10 @@ public class TimerNotification {
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
                 .setContentTitle("Teamwork timer")
                 .setContentText(time)
+
                 .setSmallIcon(R.drawable.ic_pause_circle_filled_white_24dp)
-                .setOngoing(true);
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_pause_circle_filled_white_24dp));
+//                .setOngoing(true);
 
         if (isStarted(state)) {
             notifBuilder.addAction(R.drawable.pause_white_24dp, "Pause",
@@ -40,7 +43,7 @@ public class TimerNotification {
                     getWidgetPendingIntent(context, WidgetProvider.CLICK_RESET_BUTTON));
         }
 
-        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManagerCompat notifManager = NotificationManagerCompat.from(context);
         notifManager.notify(NOTIFICATION_ID, notifBuilder.build());
 
     }
