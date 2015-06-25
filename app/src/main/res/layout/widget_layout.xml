@@ -17,7 +17,7 @@
             android:id="@+id/play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_play_circle_filled_white_48dp"
+            android:src="@drawable/play_white_24dp"
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_marginLeft="2dp"
             android:layout_marginStart="2dp"
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:textColor="#FFF"
             android:textSize="24sp"
-            android:text="1:30"
+            android:text="0:00:00"
             />
 
         <TextView

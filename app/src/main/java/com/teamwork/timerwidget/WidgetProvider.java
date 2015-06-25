@@ -248,6 +248,10 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) {
         super.onRestored(context, oldWidgetIds, newWidgetIds);
 
+        for (int id : oldWidgetIds) {
+            sWidgetIds.add(id);
+        }
+
         Log.d("tw", "onRestored: \n\told: " + Arrays.toString(oldWidgetIds) + "\n\tnew: " + Arrays.toString(newWidgetIds));
 
     }
