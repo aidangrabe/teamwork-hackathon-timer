@@ -80,7 +80,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
                 long deltaMillis = now.getTime() - sStartTime.getTime();
                 deltaMillis += sTimerMillis;
-                remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
+                remoteViews.setImageViewResource(R.id.play_button, R.drawable.pause_white_24dp);
 
                 String timeLabel = getTimeString(deltaMillis);
 
