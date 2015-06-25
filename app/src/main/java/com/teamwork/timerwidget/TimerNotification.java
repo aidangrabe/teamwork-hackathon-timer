@@ -53,7 +53,6 @@ public class TimerNotification {
 
         wearableExtender.setBackground(sWearableBitmap);
         notifBuilder.extend(wearableExtender);
-        sWearBackgroundReady = true;
 
         notifManager.notify(NOTIFICATION_ID, notifBuilder.build());
 
