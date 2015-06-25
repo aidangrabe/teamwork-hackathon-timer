@@ -23,18 +23,25 @@ public class WidgetProvider extends AppWidgetProvider {
 
     private static final long UPDATE_INTERVAL = TimeUnit.SECONDS.toMillis(5);
 
-    private static final String CLICK_PLAY_BUTTON = "playButtonOnClick";
-    private static final String CLICK_RESET_BUTTON = "resetButtonOnClick";
+    private static final String CLICK_PLAY_BUTTON       = "playButtonOnClick";
+    private static final String CLICK_RESET_BUTTON      = "resetButtonOnClick";
+    private static final String CLICK_LOG_TIME_BUTTON   = "logTimeButtonOnClick";
 
     private static boolean sTimerStarted = false;
     private static int[] sWidgetIds;
     private static Date sStartTime;
     private static Handler sHandler;
+    private static long sTimerMillis;
+    private static TimerState sTimerState = TimerState.STOPPED;
+
+    enum TimerState {
+        PAUSED, STARTED, STOPPED
+    }
 
     public WidgetProvider() {
 
-        sHandler = new Handler(Looper.getMainLooper());
-
+        sHandler        = new Handler(Looper.getMainLooper());
+        sTimerMillis    = 0;
 
     }
 
@@ -51,10 +58,10 @@ public class WidgetProvider extends AppWidgetProvider {
         Log.d("tw", "onUpdate");
 
         sWidgetIds = appWidgetIds;
-
-
         Date now = Calendar.getInstance().getTime();
-        if (sTimerStarted) {
+
+        // call onUpdate again in UPDATE_INTERVAL milliseconds
+        if (isStarted()) {
             startUpdateTimer(context, appWidgetIds);
         }
 
@@ -63,7 +70,7 @@ public class WidgetProvider extends AppWidgetProvider {
             RemoteViews remoteViews = new RemoteViews(
                     context.getPackageName(),R.layout.widget_layout);
 
-            if (sTimerStarted) {
+            if (isStarted()) {
 
                 long deltaMillis = now.getTime() - sStartTime.getTime();
                 int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(deltaMillis) % 60);
@@ -73,11 +80,13 @@ public class WidgetProvider extends AppWidgetProvider {
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
                 remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
                 showExtraButtons(remoteViews, false);
-            } else {
+            }
+
+            if (isStopped() || isPaused()) {
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_play_circle_filled_white_48dp);
             }
 
-            if (!sTimerStarted && sStartTime != null) {
+            if (isPaused()) {
                 showExtraButtons(remoteViews, true);
             }
 
@@ -100,13 +109,11 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     private void startUpdateTimer(final Context context, final int[] appWidgetIds) {
-        final Context c = context;
-        final int[] ids = appWidgetIds;
         Runnable r = new Runnable() {
             @Override
             public void run() {
                 Log.d("tw", "Handler calling!");
-                onUpdate(c, AppWidgetManager.getInstance(c), ids);
+                onUpdate(context, AppWidgetManager.getInstance(context), appWidgetIds);
             }
         };
         sHandler.removeCallbacks(r);
@@ -114,27 +121,55 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     public void startTimer() {
-        if (sStartTime == null) {
-            sStartTime = Calendar.getInstance().getTime();
-        }
+        sTimerState = TimerState.STARTED;
+
+        sStartTime = Calendar.getInstance().getTime();
+    }
+
+    public void resumeTimer() {
+        sTimerState = TimerState.STARTED;
+    }
+
+    public void pauseTimer() {
+        sTimerState = TimerState.PAUSED;
+    }
+
+    public void resetTimer() {
+        sTimerState = TimerState.STOPPED;
     }
 
     public void onPlayButtonClicked(Context context) {
 
-        startTimer();
-        sTimerStarted = !sTimerStarted;
+        Log.d("tw", "State: " + sTimerState.name());
+        if (isPaused()) {
+            Log.d("tw", "isPaused, resuming");
+            resumeTimer();
+        } else if (isStarted()) {
+            Log.d("tw", "isStarted, pausing");
+            pauseTimer();
+        } else {
+            Log.d("tw", "isStopped, starting");
+            startTimer();
+        }
+        Log.d("tw", "State: " + sTimerState.name());
 
         onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
-    }
 
-    public void resetTimer() {
-        sTimerStarted   = false;
-        sStartTime      = null;
     }
 
     public void onResetButtonClicked(Context context) {
 
         resetTimer();
+
+        onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
+
+    }
+
+    public void onLogTimeButtonClicked(Context context) {
+
+        // TODO: log time on Teamwork.com
+        resetTimer();
+
         onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
 
     }
@@ -145,9 +180,24 @@ public class WidgetProvider extends AppWidgetProvider {
 
         if (intent.getAction().equals(CLICK_PLAY_BUTTON)) {
             onPlayButtonClicked(context);
-        } else if (intent.getAction().equals(CLICK_PLAY_BUTTON)) {
+        } else if (intent.getAction().equals(CLICK_RESET_BUTTON)) {
             onResetButtonClicked(context);
+        } else if (intent.getAction().equals(CLICK_LOG_TIME_BUTTON)) {
+            onLogTimeButtonClicked(context);
         }
 
     }
+
+    private boolean isStarted() {
+        return sTimerState == TimerState.STARTED;
+    }
+
+    private boolean isPaused() {
+        return sTimerState == TimerState.PAUSED;
+    }
+
+    private boolean isStopped() {
+        return sTimerState == TimerState.STOPPED;
+    }
+
 }
