@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -22,9 +24,12 @@ public class WidgetProvider extends AppWidgetProvider {
 
     private static boolean sTimerStarted = false;
     private static int[] sWidgetIds;
-    private Date sStartTime;
+    private static Date sStartTime;
+    private static Handler sHandler;
 
     public WidgetProvider() {
+
+        sHandler = new Handler(Looper.getMainLooper());
 
 
     }
@@ -39,6 +44,18 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
+        final Context c = context;
+        final int[] ids = appWidgetIds;
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                Log.d("tw", "Handler calling!");
+                onUpdate(c, AppWidgetManager.getInstance(c), ids);
+            }
+        };
+        sHandler.removeCallbacks(r);
+        sHandler.postDelayed(r, 10000);
+
         Log.d("tw", "onUpdate");
 
         sWidgetIds = appWidgetIds;
@@ -52,14 +69,15 @@ public class WidgetProvider extends AppWidgetProvider {
 
                 Date now = Calendar.getInstance().getTime();
                 long deltaMillis = now.getTime() - sStartTime.getTime();
+                int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(deltaMillis) % 60);
                 int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(deltaMillis) % 60);
                 int hours   = (int) (TimeUnit.MILLISECONDS.toHours(deltaMillis));
                 Log.d("tw", "deltaMillis: " + deltaMillis);
-                Log.d("tw", "minutes: " + minutes);
+                Log.d("tw", "minutes: " + (TimeUnit.MILLISECONDS.toMinutes(deltaMillis)));
                 Log.d("tw", "hours: " + hours);
 
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
-                remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d", hours, minutes));
+                remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
             } else {
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_play_arrow_white_24dp);
             }
