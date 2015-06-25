@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class WidgetProvider extends AppWidgetProvider {
 
-    private static final long UPDATE_INTERVAL = TimeUnit.SECONDS.toMillis(5);
+    private static final long UPDATE_INTERVAL = TimeUnit.SECONDS.toMillis(2);
 
     private static final String CLICK_PLAY_BUTTON       = "playButtonOnClick";
     private static final String CLICK_RESET_BUTTON      = "resetButtonOnClick";
@@ -32,6 +32,7 @@ public class WidgetProvider extends AppWidgetProvider {
     private static Handler sHandler;
     private static long sTimerMillis = 0;
     private static TimerState sTimerState = TimerState.STOPPED;
+    private static Runnable sTimerRunnable;
 
     enum TimerState {
         PAUSED, STARTED, STOPPED
@@ -49,6 +50,11 @@ public class WidgetProvider extends AppWidgetProvider {
         Intent intent = new Intent(context, getClass());
         intent.setAction(action);
         return PendingIntent.getBroadcast(context, 0, intent, 0);
+    }
+
+    // shorter convenience method of onUpdate()
+    public void onUpdate(Context context) {
+        onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
     }
 
     @Override
@@ -74,18 +80,20 @@ public class WidgetProvider extends AppWidgetProvider {
 
                 long deltaMillis = now.getTime() - sStartTime.getTime();
                 deltaMillis += sTimerMillis;
-                Log.d("tw", "counting -> adding " + sTimerMillis + " to timer");
-                int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(deltaMillis) % 60);
-                int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(deltaMillis) % 60);
-                int hours   = (int) (TimeUnit.MILLISECONDS.toHours(deltaMillis));
-
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_pause_circle_filled_white_48dp);
-                remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
-                showExtraButtons(remoteViews, false);
+                setTimeLabel(remoteViews, deltaMillis);
+            }
+
+            if (isStopped()) {
+                setTimeLabel(remoteViews, 0);
             }
 
             if (isStopped() || isPaused()) {
                 remoteViews.setImageViewResource(R.id.play_button, R.drawable.ic_play_circle_filled_white_48dp);
+            }
+
+            if (isStopped() || isStarted()) {
+                showExtraButtons(remoteViews, false);
             }
 
             if (isPaused()) {
@@ -104,6 +112,13 @@ public class WidgetProvider extends AppWidgetProvider {
 
     }
 
+    private void setTimeLabel(RemoteViews remoteViews, long millis) {
+        int seconds = (int) (TimeUnit.MILLISECONDS.toSeconds(millis) % 60);
+        int minutes = (int) (TimeUnit.MILLISECONDS.toMinutes(millis) % 60);
+        int hours   = (int) (TimeUnit.MILLISECONDS.toHours(millis));
+        remoteViews.setTextViewText(R.id.time_label, String.format("%d:%02d:%02d", hours, minutes, seconds));
+    }
+
     private void showExtraButtons(RemoteViews remoteViews, boolean show) {
         int visible = show ? View.VISIBLE : View.GONE;
         remoteViews.setViewVisibility(R.id.reset_button, visible);
@@ -111,15 +126,17 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     private void startUpdateTimer(final Context context, final int[] appWidgetIds) {
-        Runnable r = new Runnable() {
+        // prevent stacking of runnables
+        if (sTimerRunnable != null) {
+            sHandler.removeCallbacks(sTimerRunnable);
+        }
+        sTimerRunnable = new Runnable() {
             @Override
             public void run() {
-                Log.d("tw", "Handler calling!");
                 onUpdate(context, AppWidgetManager.getInstance(context), appWidgetIds);
             }
         };
-        sHandler.removeCallbacks(r);
-        sHandler.postDelayed(r, UPDATE_INTERVAL);
+        sHandler.postDelayed(sTimerRunnable, UPDATE_INTERVAL);
     }
 
     public void startTimer() {
@@ -162,15 +179,16 @@ public class WidgetProvider extends AppWidgetProvider {
             startTimer();
         }
 
-        onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
+        onUpdate(context);
 
     }
 
     public void onResetButtonClicked(Context context) {
 
+        Log.d("tw", "resetting timer");
         resetTimer();
 
-        onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
+        onUpdate(context);
 
     }
 
@@ -179,7 +197,7 @@ public class WidgetProvider extends AppWidgetProvider {
         // TODO: log time on Teamwork.com
         resetTimer();
 
-        onUpdate(context, AppWidgetManager.getInstance(context), sWidgetIds);
+        onUpdate(context);
 
     }
 
